@@ -45,8 +45,17 @@ def getReport(shorthand)
 end
 
 def uploadFile(report, cluster)
-  params = {title:"#{cluster} report", body:"#{report}"}
-  output = Faraday.post "https://jsonplaceholder.typicode.com/users/1/posts", params
-  #puts "Uploading file \"#{report}\"..."
+  conn = Faraday.new(
+    url: 'https://jsonplaceholder.typicode.com',
+    headers: {
+      'Content-Type' => 'application/json',
+      'Accept' => 'application/json'
+      }
+  )
+
+  url = "/users/1/posts"
+  body = {title: "#{cluster} report", body: "#{report}"}
+  output = conn.post(url, body.to_json)
+
   puts output.body
 end

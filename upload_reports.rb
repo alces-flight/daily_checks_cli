@@ -15,7 +15,6 @@ command :upload_report do |c|
   c.summary = ''
   c.description = ''
   c.example 'description', 'command example'
-  # c.option '--some-switch', 'Some switch that does something'
   c.action do |args, options|
     if args.empty?
       say "No cluster specified."
@@ -24,7 +23,7 @@ command :upload_report do |c|
     else
       report = getReport(args[0])
       if report != 0
-        uploadFile(report, args[0])
+        uploadFile(report["file"], args[0], report["authToken"])
       else
         say "File does not exist - please ensure the cluster name is correct and the checks have been performed today."
       end
@@ -32,30 +31,42 @@ command :upload_report do |c|
   end
 end
 
+#grabs information from the YAML file and passes it back
 def getReport(shorthand)
   components = YAML.load(File.read("components.yaml"))
   cluster = components[shorthand]["name"]
+  auth = components[shorthand]["auth"]
   date = Time.new.strftime("%d-%m-%y").gsub('-','_')
   filepath = "exampleClusters/#{date} #{cluster} report.pdf"
   if File.file?(filepath)
-    return filepath
+    clusterInfo = {
+      "file" => filepath,
+      "authToken" => auth
+    }
+    return clusterInfo
   else
     return 0
   end
 end
 
-def uploadFile(report, cluster)
+def uploadFile(report, cluster, authToken)
+  
+  content = File.read(report).to_json
+
   conn = Faraday.new(
-    url: 'https://jsonplaceholder.typicode.com',
+    url: 'http://center.alces-flight.lvh.me:3000',
     headers: {
-      'Content-Type' => 'application/json',
-      'Accept' => 'application/json'
-      }
+      'Content-Type' => 'multipart/form-data',
+      'Accept' => 'application/json',
+      'Authorization' => "Bearer #{authToken}"
+    },
+    params: {
+      attachment: {data: content},
+      user: "Scott Mackenzie"
+    }
   )
 
-  url = "/users/1/posts"
-  body = {title: "#{cluster} report", body: "#{report}"}
-  output = conn.post(url, body.to_json)
-
+  output = conn.post('/components/BAR/cluster_checks_reports/submit')
+  
   puts output.body
 end

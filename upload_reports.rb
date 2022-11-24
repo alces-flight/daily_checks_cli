@@ -4,6 +4,7 @@ require 'rubygems'
 require 'commander/import'
 require 'time'
 require 'faraday'
+require 'faraday/multipart'
 require 'yaml'
 
 program :name, 'upload_report'
@@ -51,7 +52,7 @@ end
 
 def uploadFile(report, cluster, authToken)
   
-  content = File.read(report).to_json
+  content = Faraday::Multipart::FilePart.new(report, 'text/x-ruby')
 
   conn = Faraday.new(
     url: 'http://center.alces-flight.lvh.me:3000',
@@ -59,14 +60,12 @@ def uploadFile(report, cluster, authToken)
       'Content-Type' => 'multipart/form-data',
       'Accept' => 'application/json',
       'Authorization' => "Bearer #{authToken}"
-    },
-    params: {
-      attachment: {data: content},
-      user: "Scott Mackenzie"
     }
   )
 
-  output = conn.post('/components/BAR/cluster_checks_reports/submit')
-  
+  output = conn.post('/components/BAR/cluster_checks_reports/submit') do |out|
+    out.body = {attachment: {data: content}, user: "Scott Mackenzie"}.to_json
+  end
+
   puts output.body
 end

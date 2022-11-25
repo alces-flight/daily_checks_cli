@@ -52,19 +52,19 @@ end
 
 def uploadFile(report, cluster, authToken)
   
-  content = Faraday::Multipart::FilePart.new(report, 'text/x-ruby')
+  content = Faraday::Multipart::FilePart.new(report, 'pdf', nil, 'Content-Disposition' => 'multipart/form-data') 
 
-  conn = Faraday.new(
-    url: 'http://center.alces-flight.lvh.me:3000',
-    headers: {
+  conn = Faraday.new(:url => 'http://center.alces-flight.lvh.me:3000') do |faraday|
+    faraday.request :multipart
+  end
+
+  output = conn.post('/components/BAR/cluster_checks_reports/submit') do |out|
+    out.headers = {
       'Content-Type' => 'multipart/form-data',
       'Accept' => 'application/json',
       'Authorization' => "Bearer #{authToken}"
     }
-  )
-
-  output = conn.post('/components/BAR/cluster_checks_reports/submit') do |out|
-    out.body = {attachment: {data: content}, user: "Scott Mackenzie"}.to_json
+    out.body = {attachment: {data: content}, user: "Scott Mackenzie"}
   end
 
   puts output.body

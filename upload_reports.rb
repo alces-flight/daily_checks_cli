@@ -58,7 +58,7 @@ def uploadFile(report, cluster, authToken)
     faraday.request :multipart
   end
 
-  output = conn.post('/components/BAR/cluster_checks_reports/submit') do |out|
+  output = conn.post("/components/#{cluster}/cluster_checks_reports/submit") do |out|
     out.headers = {
       'Content-Type' => 'multipart/form-data',
       'Accept' => 'application/json',
@@ -67,5 +67,15 @@ def uploadFile(report, cluster, authToken)
     out.body = {attachment: {data: content}, user: "Scott Mackenzie"}
   end
 
-  puts output.body
+  handleResponse(output.body)
 end
+
+def handleResponse(response)
+   parsedResponse = JSON.parse(response)
+
+   puts ""
+   puts parsedResponse["error"] unless parsedResponse["error"].nil?
+   puts parsedResponse["data"] unless parsedResponse["data"].nil?
+   puts ""
+end
+

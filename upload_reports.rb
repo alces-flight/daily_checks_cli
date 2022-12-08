@@ -1,11 +1,13 @@
 #!/usr/bin/env ruby
 
 require 'rubygems'
+require 'bundler/setup'
 require 'commander/import'
 require 'time'
 require 'faraday'
 require 'faraday/multipart'
 require 'yaml'
+require 'google_drive'
 
 program :name, 'upload_report'
 program :version, '0.0.1'
@@ -31,6 +33,8 @@ command :upload_report do |c|
     end
   end
 end
+
+session = GoogleDrive::Session.from_service_account_key("daily-checks-cli-8758ad58e732.json")
 
 #grabs information from the YAML file and passes it back
 def getReport(shorthand)

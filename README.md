@@ -18,7 +18,30 @@ bundle install
 
 ### Operation
 
-The following command will upload a report matching today's date and the cluster specified by the shortcode given from a preset location, assuming such a report is present:
+#### File storage and format
+
+Files should be stored as pdfs in the /report folder, in the following format:
+```bash
+dd_mm_yy <cluster> report.pdf
+```
+
+where the date is the current date, and <cluster> is the name of the cluster for which the report was created.
+  
+#### YAML file
+  
+A YAML file named components.yaml will need to be created and populated in order for the tool to grab the required details from a given shortcode. The YAML file should be written as follows:
+
+```bash
+<shortcode>:
+    name: "<cluster>"
+    auth: "<auth_token>"
+```
+  
+with the fields filled in appropriately. Every cluster must be listed in this YAML file.
+  
+#### Running the tool
+
+The following command will upload a report matching today's date and the cluster specified by the shortcode given from the /reports folder, assuming such a report is present:
 
 ```bash
 ruby upload_reports.rb upload_report <shortcode>

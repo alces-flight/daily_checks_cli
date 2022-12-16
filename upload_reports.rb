@@ -7,6 +7,7 @@ require 'time'
 require 'faraday'
 require 'faraday/multipart'
 require 'yaml'
+require 'json'
 
 program :name, 'upload_report'
 program :version, '0.0.1'
@@ -39,7 +40,7 @@ def getReport(shorthand)
   cluster = components[shorthand]["name"]
   auth = components[shorthand]["auth"]
   date = Time.new.strftime("%d-%m-%y").gsub('-','_')
-  filepath = "exampleClusters/#{date} #{cluster} report.pdf"
+  filepath = "reports/#{date} #{cluster} report.pdf"
   if File.file?(filepath)
     clusterInfo = {
       "file" => filepath,
@@ -74,9 +75,7 @@ end
 def handleResponse(response)
    parsedResponse = JSON.parse(response)
 
-   puts ""
-   puts parsedResponse["error"] unless parsedResponse["error"].nil?
-   puts parsedResponse["data"] unless parsedResponse["data"].nil?
-   puts ""
+   puts "ERROR: " + parsedResponse["error"] unless parsedResponse["error"].nil?
+   puts "SUCCESS: " + parsedResponse["data"] unless parsedResponse["data"].nil?
 end
 
